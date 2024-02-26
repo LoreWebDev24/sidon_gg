@@ -1,36 +1,23 @@
 <script setup>
-import axios from "axios";
 import { useRouter } from "vue-router";
 const router = useRouter();
 import { ref } from "vue";
 const playerSearch = ref("");
 
-// API CALL
-
 async function fetchPlayer() {
-  await axios
-    .get(
-      "http://localhost:4000/past10Games"
-    )
-    .then((resp) => {
-      console.log(resp);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
-  // MANDO UN UTENTE ALLA PAGINA DI DETTAGLIO DELLA RICERCA
-
-  // router.push({
-  // 	name: "PlayerDetail",
-  // });
+  router.push({
+  	name: "PlayerDetail",
+    params: {slug: playerSearch.value}
+  });
 }
+
+
 </script>
 
 <template>
   <section class="search_section bg-[#1C1C1F]">
     <div class="container my-0 mx-auto px-4">
-      <form>
+      <form id="searchPlayer" @submit.prevent="validationForm">
         <div class="flex justify-center">
           <label
             for="search-dropdown"

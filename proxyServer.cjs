@@ -6,7 +6,7 @@ const app = express();
 
 app.use(cors());
 
-const API_KEY = 
+const API_KEY = "RGAPI-ab84076e-1c0b-4312-bdf2-13d29d479074"
 
 function getPlayerPUUID(playerName) {
     return axios.get("https://europe.api.riotgames.com" + "/riot/account/v1/accounts/by-riot-id/" + playerName + "?api_key=" + API_KEY )
@@ -17,7 +17,7 @@ function getPlayerPUUID(playerName) {
 }
 
 app.get('/past10Games', async (req, res) =>{
-    const playerName = "KitingDeft/FUOCO";
+    const playerName = req.query.username;
     const PUUID = await getPlayerPUUID(playerName);
     const API_CALL = "https://europe.api.riotgames.com" + "/lol/match/v5/matches/by-puuid/" + PUUID + "/ids?start=0&count=20" + "&api_key=" + API_KEY
 
