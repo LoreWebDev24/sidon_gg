@@ -3,21 +3,36 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 import { ref } from "vue";
 const playerSearch = ref("");
+const errorSpan = ref("");
 
-async function fetchPlayer() {
+// async function fetchPlayer() {
+ 
+// }
+
+function hasOneAndOnlyOneHash(str) {
+  const matches = str.match(/#/g);
+  return matches && matches.length === 1;
+}
+
+function fetchPlayer() {
+
+  if (playerSearch.value ===  "" || !hasOneAndOnlyOneHash(playerSearch.value) || playerSearch.value.length < 5 || playerSearch.value.length > 40 ) {
+    errorSpan.value = 'Insert a valid NickName and Tag';
+    return 
+  }           
+
   router.push({
   	name: "PlayerDetail",
     params: {slug: playerSearch.value}
   });
 }
 
-
 </script>
 
 <template>
   <section class="search_section bg-[#1C1C1F]">
     <div class="container my-0 mx-auto px-4">
-      <form id="searchPlayer" @submit.prevent="validationForm">
+      <form id="searchPlayer">
         <div class="flex justify-center">
           <label
             for="search-dropdown"
@@ -92,6 +107,7 @@ async function fetchPlayer() {
               class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
               placeholder="Insert your Summoner Name"
             />
+            <span>{{ errorSpan }}</span>
             <button
               type="submit"
               @click.prevent="fetchPlayer()"

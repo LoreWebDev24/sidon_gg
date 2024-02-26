@@ -8,7 +8,7 @@ const playerGames = ref([]);
 onMounted(async () => {
   await axios
     .get("http://localhost:4000/past10Games", {
-      params: { username: slug },
+      params: { username: playerSearch.value },
     })
     .then((resp) => {
       playerGames.value = resp.data;
