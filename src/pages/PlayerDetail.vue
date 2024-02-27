@@ -22,7 +22,7 @@ onMounted(async () => {
       console.log(playerGames.value);
       console.log(slug);
       console.log(replaceHashWithSlash(slug));
-      console.log(typeof(replaceHashWithSlash(slug)))
+      console.log(typeof(replaceHashWithSlash(slug)));
     })
     .catch((error) => {
       console.log(error);
