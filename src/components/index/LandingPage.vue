@@ -6,7 +6,7 @@ const playerSearch = ref("");
 const errorSpan = ref("");
 
 // async function fetchPlayer() {
- 
+
 // }
 
 function hasOneAndOnlyOneHash(str) {
@@ -14,24 +14,39 @@ function hasOneAndOnlyOneHash(str) {
   return matches && matches.length === 1;
 }
 
-function fetchPlayer() {
+// function checkAtLeastThreeCharsAfterHash(inputString) {
+//   const regex = /^#[\S]{3,}$/;
 
-  if (playerSearch.value ===  "" || !hasOneAndOnlyOneHash(playerSearch.value) || playerSearch.value.length < 5 || playerSearch.value.length > 40 ) {
-    errorSpan.value = 'Insert a valid NickName and Tag';
-    return 
-  }           
+//   return regex.test(inputString);
+// }
 
-  router.push({
-  	name: "PlayerDetail",
-    params: {slug: playerSearch.value}
-  });
+function hashtoWord(inputString) { 
+  let outputString = inputString.replace(/#/g, 'TAG');
+  return outputString;
 }
 
+function fetchPlayer() {
+  if (
+    playerSearch.value === "" ||
+    !hasOneAndOnlyOneHash(playerSearch.value) ||
+    playerSearch.value.length < 5 ||
+    playerSearch.value.length > 40 
+    // !checkAtLeastThreeCharsAfterHash(playerSearch.value)
+  ) {
+    errorSpan.value = "Insert a valid NickName and Tag";
+    return;
+  }
+
+  router.push({
+    name: "PlayerDetail",
+    params: { slug: hashtoWord(playerSearch.value) },
+  });
+}
 </script>
 
 <template>
   <section class="search_section bg-[#1C1C1F]">
-    <div class="container my-0 mx-auto px-4">
+    <div class="container my-0 mx-auto px-4 h-[50px]">
       <form id="searchPlayer">
         <div class="flex justify-center">
           <label
@@ -107,7 +122,6 @@ function fetchPlayer() {
               class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
               placeholder="Insert your Summoner Name"
             />
-            <span>{{ errorSpan }}</span>
             <button
               type="submit"
               @click.prevent="fetchPlayer()"
@@ -130,6 +144,9 @@ function fetchPlayer() {
               </svg>
             </button>
           </div>
+        </div>
+        <div class="container w-[614px] my-0 mx-auto">
+          <span class="text-red-600 text-xs">{{ errorSpan }}</span>
         </div>
       </form>
     </div>

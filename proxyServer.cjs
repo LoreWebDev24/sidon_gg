@@ -6,6 +6,8 @@ const app = express();
 
 app.use(cors());
 
+// API KEY THAT AS TO BE REGENERATED AND PASTED HERE EVERY 24H FROM RIOT CLIENT (JUST CAUSE IS THE BASIC API_KEY)
+
 const API_KEY = "RGAPI-44b2ff57-2082-4c03-98b0-921ea398d2cf"
 
 function getPlayerPUUID(playerName) {

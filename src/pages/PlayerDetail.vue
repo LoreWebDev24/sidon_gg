@@ -7,7 +7,7 @@ const playerGames = ref([]);
 
 function replaceHashWithSlash(inputString) {
 
-    const stringWithoutHash = inputString.replace(/#/g, '/');
+    const stringWithoutHash = inputString.replace(/TAG/g, '/');
 
   return stringWithoutHash;
 }
