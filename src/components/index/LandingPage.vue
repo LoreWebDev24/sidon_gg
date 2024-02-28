@@ -14,24 +14,43 @@ function hasOneAndOnlyOneHash(str) {
   return matches && matches.length === 1;
 }
 
-// function checkAtLeastThreeCharsAfterHash(inputString) {
-//   const regex = /^#[\S]{3,}$/;
-
-//   return regex.test(inputString);
-// }
-
-function hashtoWord(inputString) { 
-  let outputString = inputString.replace(/#/g, 'TAG');
+function hashToWord(inputString) {
+  let outputString = inputString.replace(/#/g, "TAG");
   return outputString;
+}
+
+// FUNCTION THAT VERIFY THAT STRING HAS AT LEAST 3 CHAR AFTER HASH
+
+function verifyStringAfterHash(inputString) {
+  let indexHashtag = inputString.indexOf("#");
+  if (indexHashtag !== -1 && inputString.length >= indexHashtag + 4) {
+    let subStringAfterHash = inputString.substring(
+      indexHashtag + 1,
+      indexHashtag + 4
+    );
+    if (subStringAfterHash.length >= 3) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function verifyStringAfterHashNoMoreThanFiveChars(inputStr) {
+  let indexHash = inputStr.indexOf("#");
+  if (indexHash !== -1) {
+    let subStringAfterHashTag = inputStr.substring(indexHash + 1);
+    return subStringAfterHashTag.length > 5;
+  }
 }
 
 function fetchPlayer() {
   if (
     playerSearch.value === "" ||
     !hasOneAndOnlyOneHash(playerSearch.value) ||
-    playerSearch.value.length < 5 ||
-    playerSearch.value.length > 40 
-    // !checkAtLeastThreeCharsAfterHash(playerSearch.value)
+    playerSearch.value.length < 6 ||
+    playerSearch.value.length > 30 ||
+    !verifyStringAfterHash(playerSearch.value) ||
+    verifyStringAfterHashNoMoreThanFiveChars(playerSearch.value)
   ) {
     errorSpan.value = "Insert a valid NickName and Tag";
     return;
@@ -39,7 +58,7 @@ function fetchPlayer() {
 
   router.push({
     name: "PlayerDetail",
-    params: { slug: hashtoWord(playerSearch.value) },
+    params: { slug: hashToWord(playerSearch.value) },
   });
 }
 </script>
