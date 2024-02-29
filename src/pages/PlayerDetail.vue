@@ -8,8 +8,12 @@ const PUUID = ref("");
 // let matchResult = ref("");
 // const runesArray = ref([]);
 
-function isCurrentPlayer(partecipant){
-  return partecipant.puuid === PUUID
+function getPlayerChampionPicture(game){
+  let participant = game.info.participants.find(p => p.puuid === PUUID.value);
+  if(participant === undefined) {
+    return 
+  }
+  return "/public/14.4/img/champion/" + participant.championName + '.png';
 }
 
 
@@ -18,7 +22,6 @@ function getmatchResult(game) {
   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
   if(participant === undefined) {
     return 
-    
   }
   return participant.win;
 }
@@ -72,6 +75,8 @@ onMounted(async () => {
       console.log(error);
     });
 
+// EXAMPLE HOW TO TAKE RUNES ETC FROM DDRAGON INSTEAD OF LOCALE FILES 
+
   // await axios
   // .get("https://ddragon.leagueoflegends.com/cdn/14.4.1/data/en_US/runesReforged.json", {
   // })
@@ -94,9 +99,9 @@ onMounted(async () => {
           class="single_game_details h-[130px] border-[1px] border-[white] rounded flex bg-[#659BE0]"
         >
           <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
-            <span class="text-center"> {{ getmatchResult(game)
- }}</span>
-            <span> {{ game.info.gameMode }} </span>
+            <span class="text-center"> {{ getmatchResult(game) ? 'VICTORY' : 'DEFEAT'}}
+ </span>
+            <span> {{ game.info.gameMode }} GAME </span>
             <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
             <span>
               {{
@@ -111,7 +116,7 @@ onMounted(async () => {
               <div class="flex justify-center items-center">
                 <img
                   class="w-[60px] h-[60px] rounded-[50%]"
-                  src="/14.4/img/champion/Samira.png"
+                  :src="getPlayerChampionPicture(game)"
                   alt=""
                 />
               </div>
