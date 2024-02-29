@@ -7,24 +7,71 @@ const playerGames = ref([]);
 const PUUID = ref("");
 // let matchResult = ref("");
 // const runesArray = ref([]);
-
-function getPlayerChampionPicture(game){
-  let participant = game.info.participants.find(p => p.puuid === PUUID.value);
-  if(participant === undefined) {
-    return 
+function getPlayerInTheMatch(game){
+  let partecipant = game.info.participants.find((p) => p.puuid === PUUID.value);
+  return partecipant
+}
+function getPathOfThePicture(game, type) {
+  const participant = getPlayerInTheMatch(game)
+  let runes = undefined;
+  if (type === "mainRune") {
+    runes = participant.perks.styles[0].selections[0].perk;
+  } else if (type === "secondThreeOfRuines") {
+    runes = participant.perks.styles[1].style;
   }
-  return "/public/14.4/img/champion/" + participant.championName + '.png';
+  return (
+    participant &&
+    `/14.4/img/${runes ? 'runes' : type}/${runes ? runes : participant.championName}.png`
+  );
 }
 
+// function getPlayerChampionPicture(game){
+//   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
+//   if(participant === undefined) {
+//     return
+//   }
+//   return "/14.4/img/champion/" + participant.championName + '.png'
+// }
 
+function getPlayerSummonerSpellOne(game) {
+  let participant = getPlayerInTheMatch(game);
+  if(participant === undefined) {
+    return
+  }
+  return "/14.4/img/spell/" + participant.summoner1Id + '.png'
+}
+
+function getPlayerSummonerSpellTwo(game) {
+  let participant = getPlayerInTheMatch(game);
+  if(participant === undefined) {
+    return
+  }
+  return "/14.4/img/spell/" + participant.summoner2Id + '.png'
+}
+
+// function getPlayerFirstRune(game) {
+//   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
+//   if(participant === undefined) {
+//     return
+//   }
+//   let mainRune = participant.perks.styles[0].selections[0].perk
+//   return "/14.4/img/runes/" + mainRune + '.png'
+// }
+
+// function getPlayerSecondThreeOfRuines(game) {
+//   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
+//   if(participant === undefined) {
+//     return
+//   }
+//   let mainRune = participant.perks.styles[1].style
+//   return "/14.4/img/runes/" + mainRune + '.png'
+// }
 
 function getmatchResult(game) {
-  let participant = game.info.participants.find(p => p.puuid === PUUID.value);
-  if(participant === undefined) {
-    return 
-  }
-  return participant.win;
+  const participant = getPlayerInTheMatch(game)
+  return participant && participant.win
 }
+
 
 function replaceHashWithSlash(inputString) {
   const stringWithoutHash = inputString.replace(/TAG/g, "/");
@@ -36,14 +83,18 @@ function timestampToDate(timestamp) {
   const date = new Date(timestamp);
 
   const year = date.getFullYear();
-  const month = date.getMonth() + 1; 
+  const month = date.getMonth() + 1;
   const day = date.getDate();
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const seconds = date.getSeconds();
 
-  const formattedDate = `${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
-  const formattedTime = `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+  const formattedDate = `${month < 10 ? "0" + month : month}-${
+    day < 10 ? "0" + day : day
+  }`;
+  const formattedTime = `${hours < 10 ? "0" + hours : hours}:${
+    minutes < 10 ? "0" + minutes : minutes
+  }:${seconds < 10 ? "0" + seconds : seconds}`;
 
   const formattedDateTime = `${formattedDate} ${formattedTime}`;
 
@@ -75,7 +126,7 @@ onMounted(async () => {
       console.log(error);
     });
 
-// EXAMPLE HOW TO TAKE RUNES ETC FROM DDRAGON INSTEAD OF LOCALE FILES 
+  // EXAMPLE HOW TO TAKE RUNES ETC FROM DDRAGON INSTEAD OF LOCALE FILES
 
   // await axios
   // .get("https://ddragon.leagueoflegends.com/cdn/14.4.1/data/en_US/runesReforged.json", {
@@ -91,16 +142,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px]">
+  <section class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1]">
     <div class="container my-0 mx-auto">
       <div class="games_detail_wrapper grid grid-cols-1 gap-7">
-        <div
-          v-for="game in playerGames"
-          class="single_game_details h-[130px] border-[1px] border-[white] rounded flex bg-[#659BE0]"
+        <template v-for="game,i in playerGames">
+          <div
+          v-if="game.info.endOfGameResult === 'GameComplete'" :key="i"
+          class="single_game_details h-[130px] rounded flex p-3"
+          :class="
+            getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'
+          "
         >
           <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
-            <span class="text-center"> {{ getmatchResult(game) ? 'VICTORY' : 'DEFEAT'}}
- </span>
+            <span class="text-center">
+              {{ getmatchResult(game) ? "VICTORY" : "DEFEAT" }}
+            </span>
             <span> {{ game.info.gameMode }} GAME </span>
             <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
             <span>
@@ -116,19 +172,19 @@ onMounted(async () => {
               <div class="flex justify-center items-center">
                 <img
                   class="w-[60px] h-[60px] rounded-[50%]"
-                  :src="getPlayerChampionPicture(game)"
+                  :src="getPathOfThePicture(game, 'champion')"
                   alt=""
                 />
               </div>
               <div class="ml-3 summoner_spells flex justify-center flex-col">
                 <img
                   class="w-[26px] rounded-[20%]"
-                  src="/public/14.4/img/spell/SummonerFlash.png"
+                  :src="getPlayerSummonerSpellOne(game)"
                   alt=""
                 />
                 <img
                   class="w-[26px] rounded-[20%]"
-                  src="/public/14.4/img/spell/SummonerHeal.png"
+                  :src="getPlayerSummonerSpellTwo(game)"
                   alt=""
                 />
               </div>
@@ -137,12 +193,12 @@ onMounted(async () => {
               >
                 <img
                   class="h-[35px] w-[35px]"
-                  src="/public/14.4/img/runes/8010.png"
+                  :src="getPathOfThePicture(game, 'mainRune')"
                   alt=""
                 />
                 <img
                   class="h-[20px] w-[20px]"
-                  src="/public/14.4/img/runes/8100.png"
+                  :src="getPathOfThePicture(game, 'secondThreeOfRuines')"
                   alt=""
                 />
               </div>
@@ -154,56 +210,84 @@ onMounted(async () => {
             </div>
             <div class="items_and_ward">
               <div class="items_wrapper flex gap-2">
-                <figure>
+                <figure v-if="getPlayerInTheMatch(game).item0">
                   <img
                     class="h-[34px] w-[34px] rounded-[6%]"
-                    src="/14.4/img/item/6673.png"
+                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item0}.png`"
                     alt=""
                   />
                 </figure>
-                <figure>
+                <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
+                </figure>
+                <figure v-if="getPlayerInTheMatch(game).item1">
                   <img
                     class="h-[34px] w-[34px] rounded-[6%]"
-                    src="/14.4/img/item/3031.png"
+                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item1}.png`"
                     alt=""
                   />
                 </figure>
-                <figure>
+                <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
+                </figure>
+                <figure v-if="getPlayerInTheMatch(game).item2">
                   <img
                     class="h-[34px] w-[34px] rounded-[6%]"
-                    src="/14.4/img/item/6676.png"
+                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item2}.png`"
                     alt=""
                   />
                 </figure>
-                <figure>
+                <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
+                </figure>
+                <figure v-if="getPlayerInTheMatch(game).item3">
                   <img
                     class="h-[34px] w-[34px] rounded-[6%]"
-                    src="/14.4/img/item/3036.png"
+                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item3}.png`"
                     alt=""
                   />
                 </figure>
-                <figure>
+                <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
+                </figure>
+                <figure v-if="getPlayerInTheMatch(game).item4">
                   <img
                     class="h-[34px] w-[34px] rounded-[6%]"
-                    src="/14.4/img/item/6665.png"
+                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item4}.png`"
                     alt=""
                   />
                 </figure>
-                <figure>
+                <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
+                </figure>
+                <figure v-if="getPlayerInTheMatch(game).item5">
                   <img
                     class="h-[34px] w-[34px] rounded-[6%]"
-                    src="/14.4/img/item/3111.png"
+                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item5}.png`"
                     alt=""
                   />
+                </figure>
+                <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
                 </figure>
                 <div class="ward">
-                  <figure>
+                  <figure v-if="getPlayerInTheMatch(game).item6">
                     <img
                       class="h-[34px] w-[34px]"
-                      src="/14.4/img/item/3363.png"
+                      :src="`/14.4/img/item/${getPlayerInTheMatch(game).item6}.png`"
                       alt=""
                     />
                   </figure>
+                  <figure v-else>
+                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
+                 </div>
+                </figure> 
                 </div>
               </div>
             </div>
@@ -303,7 +387,8 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </template>
       </div>
     </div>
   </section>
