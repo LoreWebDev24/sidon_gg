@@ -4,7 +4,8 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
-const runesArray = ref([]);
+const PUUID = ref("");
+// const runesArray = ref([]);
 
 
 function replaceHashWithSlash(inputString) {
@@ -19,8 +20,9 @@ onMounted(async () => {
       params: { username: replaceHashWithSlash(slug) },
     })
     .then((resp) => {
-      playerGames.value = resp.data;
-      console.log(playerGames.value);
+      playerGames.value = resp.data[0];
+      PUUID.value = resp.data[1]
+      console.log(playerGames.value, PUUID.value);
       console.log(slug);
       console.log(replaceHashWithSlash(slug));
       console.log(typeof replaceHashWithSlash(slug));
@@ -29,63 +31,83 @@ onMounted(async () => {
       console.log(error);
     });
 
-    await axios
-    .get("https://ddragon.leagueoflegends.com/cdn/14.4.1/data/en_US/runesReforged.json", {
-    })
-    .then((resp) => {
-      runesArray.value = resp.data;
-      console.log( runesArray.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+    // await axios
+    // .get("https://ddragon.leagueoflegends.com/cdn/14.4.1/data/en_US/runesReforged.json", {
+    // })
+    // .then((resp) => {
+    //   runesArray.value = resp.data;
+    //   console.log( runesArray.value);
+    // })
+    // .catch((error) => {
+    //   console.log(error);
+    // });
 });
 </script>
 
 <template>
-  <section class="games_section bg-[#1C1C1F] pt-[100px]">
+  <section class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px]">
     <div class="container my-0 mx-auto">
-      <div class="single_game_details h-[130px] border-2 border-[#659BE0] rounded flex bg-[#659BE0]">
+      <div class="games_detail_wrapper grid grid-cols-1 gap-7">
+        <div v-for="game in playerGames " class="single_game_details h-[130px] border-[1px] border-[white] rounded flex bg-[#659BE0]">
         <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
           <span class="text-center"> Vittoria</span>
           <span> Normale </span>
           <span> 13 ore fa </span>
           <span> 15:18 </span>
         </div>
-        <div class="icons_and_items_kda flex w-[30%]">
+       <div class="wrapper_kda_and_items flex flex-col w-[30%] gap-3">
+        <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
           <div class="flex justify-center items-center">
             <img
-              class="w-[60px] h-[60px]"
-              src="/public/14.4/img/champion/Kaisa.png"
+              class="w-[60px] h-[60px] rounded-[50%]"
+              src="/14.4/img/champion/Samira.png"
               alt=""
             />
           </div>
           <div class="ml-3 summoner_spells flex justify-center flex-col">
             <img
-              class="w-[30px]"
+              class="w-[26px] rounded-[20%]"
               src="/public/14.4/img/spell/SummonerFlash.png"
               alt=""
             />
             <img
-              class="w-[30px]"
+              class="w-[26px] rounded-[20%]"
               src="/public/14.4/img/spell/SummonerHeal.png"
               alt=""
             />
           </div>
-          <div class="ruines">
-            <img src="" alt="" />
-            <img src="" alt="" />
+          <div class="ruines flex flex-col justify-center ml-3 items-center">
+            <img class="h-[35px] w-[35px]" src="/public/14.4/img/runes/8010.png" alt="" />
+            <img class="h-[20px] w-[20px]" src="/public/14.4/img/runes/8100.png" alt="" />
           </div>
-          <div class="kda flex items-center ml-3">
+          <div class="kda flex items-center ml-12">
             <span> 1 / </span>
             <span> 4 / </span>
             <span> 0 </span>
           </div>
         </div>
-        <div class="cs_wards w-[20%] flex flex-col justify-center">
-          <span> Control Ward 0 </span>
-          <span> CS 102 (6.7) </span>
-          <span> Ward Palced  12 </span>
+        <div class="items_and_ward">
+          <div class="items_wrapper flex gap-2">
+            <figure><img class="h-[34px] w-[34px] rounded-[6%]" src="/14.4/img/item/6673.png" alt=""></figure>
+            <figure><img class="h-[34px] w-[34px] rounded-[6%]" src="/14.4/img/item/3031.png" alt=""></figure>
+            <figure><img class="h-[34px] w-[34px] rounded-[6%]" src="/14.4/img/item/6676.png" alt=""></figure>
+            <figure><img class="h-[34px] w-[34px] rounded-[6%]" src="/14.4/img/item/3036.png" alt=""></figure>
+            <figure><img class="h-[34px] w-[34px] rounded-[6%]" src="/14.4/img/item/6665.png" alt=""></figure>
+            <figure><img class="h-[34px] w-[34px] rounded-[6%]" src="/14.4/img/item/3111.png" alt=""></figure>
+            <div class="ward">
+              <figure>
+                <img class="h-[34px] w-[34px]" src="/14.4/img/item/3363.png" alt="">
+              </figure>
+            </div>
+          </div>
+        </div>
+       </div>
+ 
+        <div class="cs_wards w-[20%] flex flex-col justify-center text-center border-l-[1px] border-white ml-14 bl">
+          <span> Control Ward: 0 </span>
+          <span> CS: 102 (6.7) </span>
+          <span> Ward Palced:  12 </span>
+          <span> Damage: 41000</span>
         </div>
         <div class="teams_wrapper flex gap-5 w-[30%] justify-end mr-2">
           <div class="team_1_with_champ_icon flex flex-col justify-center">
@@ -174,12 +196,10 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 </template>
 
 <style>
-.games_section {
-  height: calc(100vh - 96px);
-}
 </style>

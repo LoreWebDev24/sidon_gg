@@ -10,4 +10,7 @@ import Header from "./components/Header.vue";
 </template>
 
 <style>
+body {
+  background-color: #1C1C1F;
+}
 </style>

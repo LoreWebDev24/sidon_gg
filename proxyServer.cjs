@@ -8,7 +8,7 @@ app.use(cors());
 
 // API KEY THAT AS TO BE REGENERATED AND PASTED HERE EVERY 24H FROM RIOT CLIENT (JUST CAUSE IS THE BASIC API_KEY)
 
-const API_KEY = "RGAPI-c355419b-9a99-4903-9523-40be1ac1e211"
+const API_KEY = "RGAPI-6e99f92e-c45e-4aca-879a-045d68ffd64e"
 
 function getPlayerPUUID(playerName) {
     return axios.get("https://europe.api.riotgames.com" + "/riot/account/v1/accounts/by-riot-id/" + playerName + "?api_key=" + API_KEY )
@@ -38,8 +38,8 @@ app.get('/past10Games', async (req, res) =>{
         .catch(err => err)
         matchDataArray.push(matchData)
     }
-
-    res.json(matchDataArray);
+    const arrayWithPUUID = [matchDataArray,PUUID]    
+    res.json(arrayWithPUUID);
 
 })
 
