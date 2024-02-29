@@ -4,6 +4,8 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
+const runesArray = ref([]);
+
 
 function replaceHashWithSlash(inputString) {
   const stringWithoutHash = inputString.replace(/TAG/g, "/");
@@ -22,6 +24,17 @@ onMounted(async () => {
       console.log(slug);
       console.log(replaceHashWithSlash(slug));
       console.log(typeof replaceHashWithSlash(slug));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+    await axios
+    .get("https://ddragon.leagueoflegends.com/cdn/14.4.1/data/en_US/runesReforged.json", {
+    })
+    .then((resp) => {
+      runesArray.value = resp.data;
+      console.log( runesArray.value);
     })
     .catch((error) => {
       console.log(error);
