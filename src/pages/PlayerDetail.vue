@@ -109,11 +109,23 @@ function timestampToDate(timestamp) {
   }`;
   const formattedTime = `${hours < 10 ? "0" + hours : hours}:${
     minutes < 10 ? "0" + minutes : minutes
-  }:${seconds < 10 ? "0" + seconds : seconds}`;
+  }`;
 
   const formattedDateTime = `${formattedDate} ${formattedTime}`;
 
   return formattedDateTime;
+}
+
+function formatNicknameForTeamsDisplay(str) {
+  if (str.length > 12) {
+    return str.substring(0, 12) + "...";
+  } else {
+    return str;
+  }
+}
+
+function formattDamages(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 // function daysAgoFromTimestamp(timestamp) {
@@ -161,20 +173,28 @@ onMounted(async () => {
     class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1]"
   >
     <div class="container my-0 mx-auto">
-      <div class="games_detail_wrapper grid grid-cols-1 gap-7">
+      <div class="games_detail_wrapper grid gap-7 justify-center">
         <template v-for="(game, i) in playerGames">
           <div
             v-if="game.info.endOfGameResult === 'GameComplete'"
             :key="i"
-            class="single_game_details h-[160px] rounded flex p-6"
+            class="single_game_details h-[160px] rounded flex p-6 w-[1200px]"
             :class="getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'"
           >
-            <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
-              <span class="text-center">
+            <div
+              class="ml-4 game_info flex flex-col w-[20%] justify-center text-sm"
+            >
+              <span
+                class="text-right mb-5 mr-12 text-[16px]"
+                :class="[
+                  getmatchResult(game) === true
+                    ? 'text-[#5383E8] '
+                    : 'text-[#E84057]',
+                ]"
+              >
                 {{ getmatchResult(game) ? "VICTORY" : "DEFEAT" }}
               </span>
               <span> {{ game.info.gameMode }} GAME </span>
-              <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
               <span>
                 {{
                   new Date(game.info.gameDuration * 1000)
@@ -182,6 +202,7 @@ onMounted(async () => {
                     .slice(14, 19)
                 }}
               </span>
+              <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
             </div>
             <div class="wrapper_kda_and_items flex flex-col w-[30%] gap-3">
               <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
@@ -218,10 +239,12 @@ onMounted(async () => {
                     alt=""
                   />
                 </div>
-                <div class="kda flex items-center ml-12">
-                  <span> {{getPlayerInTheMatch(game).kills}} / </span>
-                  <span> {{getPlayerInTheMatch(game).deaths}} / </span>
-                  <span> {{getPlayerInTheMatch(game).assists}} </span>
+                <div class="kda flex items-center w-[160px] justify-center">
+                  <span> {{ getPlayerInTheMatch(game).kills }}</span>
+                  <span>/ </span>
+                  <span> {{ getPlayerInTheMatch(game).deaths }}</span>
+                  <span>/ </span>
+                  <span> {{ getPlayerInTheMatch(game).assists }}</span>
                 </div>
               </div>
               <div class="items_and_ward">
@@ -331,7 +354,7 @@ onMounted(async () => {
             </div>
 
             <div
-              class="cs_wards w-[20%] flex flex-col justify-center text-center border-l-[1px] border-white ml-14 bl"
+              class="cs_wards w-[20%] flex flex-col justify-center text-center border-l-[1px] border-r-[1px] border-white ml-14 bl text-sm"
             >
               <span>
                 CS:
@@ -359,20 +382,24 @@ onMounted(async () => {
                 Vision Score: {{ getPlayerInTheMatch(game).visionScore }}</span
               >
             </div>
-            <div class="teams_wrapper w-[30%] mr-2">
-              <div
-                class="teams_with_champ_icon grid grid-rows-5 grid-cols-2"
-              >
+            <div class="teams_wrapper w-[30%] flex justify-end">
+              <div class="teams_with_champ_icon">
                 <div
                   v-for="partecipantOfTheGame in game.info.participants"
-                  class="player_with_champ_icon flex gap-2"
+                  class="player_with_champ_icon flex gap-2 w-[130px] text-sm"
                 >
                   <img
                     class="h-[18px] w-[18px]"
                     :src="`/public/14.4/img/champion/${partecipantOfTheGame.championName}.png`"
                     alt="champion_image"
                   />
-                  <span> {{ partecipantOfTheGame.riotIdGameName }} </span>
+                  <span class="">
+                    {{
+                      formatNicknameForTeamsDisplay(
+                        partecipantOfTheGame.riotIdGameName
+                      )
+                    }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -383,4 +410,11 @@ onMounted(async () => {
   </section>
 </template>
 
-<style></style>
+<style>
+.teams_with_champ_icon {
+  display: flex;
+  flex-flow: column wrap;
+  gap: 2px 2px;
+  justify-content: center;
+}
+</style>
