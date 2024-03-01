@@ -7,12 +7,12 @@ const playerGames = ref([]);
 const PUUID = ref("");
 // let matchResult = ref("");
 // const runesArray = ref([]);
-function getPlayerInTheMatch(game){
+function getPlayerInTheMatch(game) {
   let partecipant = game.info.participants.find((p) => p.puuid === PUUID.value);
-  return partecipant
+  return partecipant;
 }
 function getPathOfThePicture(game, type) {
-  const participant = getPlayerInTheMatch(game)
+  const participant = getPlayerInTheMatch(game);
   let runes = undefined;
   if (type === "mainRune") {
     runes = participant.perks.styles[0].selections[0].perk;
@@ -21,8 +21,16 @@ function getPathOfThePicture(game, type) {
   }
   return (
     participant &&
-    `/14.4/img/${runes ? 'runes' : type}/${runes ? runes : participant.championName}.png`
+    `/14.4/img/${runes ? "runes" : type}/${
+      runes ? runes : participant.championName
+    }.png`
   );
+}
+
+function getMinutesOfGameDuration(game) {
+  const seconds = game.info.gameDuration;
+  const minutes = seconds / 60;
+  return minutes;
 }
 
 // function getPlayerChampionPicture(game){
@@ -35,18 +43,26 @@ function getPathOfThePicture(game, type) {
 
 function getPlayerSummonerSpellOne(game) {
   let participant = getPlayerInTheMatch(game);
-  if(participant === undefined) {
-    return
+  if (participant === undefined) {
+    return;
   }
-  return "/14.4/img/spell/" + participant.summoner1Id + '.png'
+  return "/14.4/img/spell/" + participant.summoner1Id + ".png";
 }
 
 function getPlayerSummonerSpellTwo(game) {
   let participant = getPlayerInTheMatch(game);
-  if(participant === undefined) {
-    return
+  if (participant === undefined) {
+    return;
   }
-  return "/14.4/img/spell/" + participant.summoner2Id + '.png'
+  return "/14.4/img/spell/" + participant.summoner2Id + ".png";
+}
+
+function getTotalCs(game) {
+  const partecipant = getPlayerInTheMatch(game);
+  return (
+    partecipant &&
+    partecipant.totalMinionsKilled + partecipant.neutralMinionsKilled
+  );
 }
 
 // function getPlayerFirstRune(game) {
@@ -68,10 +84,9 @@ function getPlayerSummonerSpellTwo(game) {
 // }
 
 function getmatchResult(game) {
-  const participant = getPlayerInTheMatch(game)
-  return participant && participant.win
+  const participant = getPlayerInTheMatch(game);
+  return participant && participant.win;
 }
-
 
 function replaceHashWithSlash(inputString) {
   const stringWithoutHash = inputString.replace(/TAG/g, "/");
@@ -142,251 +157,294 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1]">
+  <section
+    class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1]"
+  >
     <div class="container my-0 mx-auto">
       <div class="games_detail_wrapper grid grid-cols-1 gap-7">
-        <template v-for="game,i in playerGames">
+        <template v-for="(game, i) in playerGames">
           <div
-          v-if="game.info.endOfGameResult === 'GameComplete'" :key="i"
-          class="single_game_details h-[130px] rounded flex p-3"
-          :class="
-            getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'
-          "
-        >
-          <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
-            <span class="text-center">
-              {{ getmatchResult(game) ? "VICTORY" : "DEFEAT" }}
-            </span>
-            <span> {{ game.info.gameMode }} GAME </span>
-            <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
-            <span>
-              {{
-                new Date(game.info.gameDuration * 1000)
-                  .toISOString()
-                  .slice(14, 19)
-              }}
-            </span>
-          </div>
-          <div class="wrapper_kda_and_items flex flex-col w-[30%] gap-3">
-            <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
-              <div class="flex justify-center items-center">
-                <img
-                  class="w-[60px] h-[60px] rounded-[50%]"
-                  :src="getPathOfThePicture(game, 'champion')"
-                  alt=""
-                />
-              </div>
-              <div class="ml-3 summoner_spells flex justify-center flex-col">
-                <img
-                  class="w-[26px] rounded-[20%]"
-                  :src="getPlayerSummonerSpellOne(game)"
-                  alt=""
-                />
-                <img
-                  class="w-[26px] rounded-[20%]"
-                  :src="getPlayerSummonerSpellTwo(game)"
-                  alt=""
-                />
-              </div>
-              <div
-                class="ruines flex flex-col justify-center ml-3 items-center"
-              >
-                <img
-                  class="h-[35px] w-[35px]"
-                  :src="getPathOfThePicture(game, 'mainRune')"
-                  alt=""
-                />
-                <img
-                  class="h-[20px] w-[20px]"
-                  :src="getPathOfThePicture(game, 'secondThreeOfRuines')"
-                  alt=""
-                />
-              </div>
-              <div class="kda flex items-center ml-12">
-                <span> 1 / </span>
-                <span> 4 / </span>
-                <span> 0 </span>
-              </div>
+            v-if="game.info.endOfGameResult === 'GameComplete'"
+            :key="i"
+            class="single_game_details h-[130px] rounded flex p-3"
+            :class="getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'"
+          >
+            <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
+              <span class="text-center">
+                {{ getmatchResult(game) ? "VICTORY" : "DEFEAT" }}
+              </span>
+              <span> {{ game.info.gameMode }} GAME </span>
+              <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
+              <span>
+                {{
+                  new Date(game.info.gameDuration * 1000)
+                    .toISOString()
+                    .slice(14, 19)
+                }}
+              </span>
             </div>
-            <div class="items_and_ward">
-              <div class="items_wrapper flex gap-2">
-                <figure v-if="getPlayerInTheMatch(game).item0">
+            <div class="wrapper_kda_and_items flex flex-col w-[30%] gap-3">
+              <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
+                <div class="flex justify-center items-center">
                   <img
-                    class="h-[34px] w-[34px] rounded-[6%]"
-                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item0}.png`"
+                    class="w-[60px] h-[60px] rounded-[50%]"
+                    :src="getPathOfThePicture(game, 'champion')"
                     alt=""
                   />
-                </figure>
-                <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure>
-                <figure v-if="getPlayerInTheMatch(game).item1">
+                </div>
+                <div class="ml-3 summoner_spells flex justify-center flex-col">
                   <img
-                    class="h-[34px] w-[34px] rounded-[6%]"
-                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item1}.png`"
+                    class="w-[26px] rounded-[20%]"
+                    :src="getPlayerSummonerSpellOne(game)"
                     alt=""
                   />
-                </figure>
-                <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure>
-                <figure v-if="getPlayerInTheMatch(game).item2">
                   <img
-                    class="h-[34px] w-[34px] rounded-[6%]"
-                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item2}.png`"
+                    class="w-[26px] rounded-[20%]"
+                    :src="getPlayerSummonerSpellTwo(game)"
                     alt=""
                   />
-                </figure>
-                <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure>
-                <figure v-if="getPlayerInTheMatch(game).item3">
+                </div>
+                <div
+                  class="ruines flex flex-col justify-center ml-3 items-center"
+                >
                   <img
-                    class="h-[34px] w-[34px] rounded-[6%]"
-                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item3}.png`"
+                    class="h-[35px] w-[35px]"
+                    :src="getPathOfThePicture(game, 'mainRune')"
                     alt=""
                   />
-                </figure>
-                <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure>
-                <figure v-if="getPlayerInTheMatch(game).item4">
                   <img
-                    class="h-[34px] w-[34px] rounded-[6%]"
-                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item4}.png`"
+                    class="h-[20px] w-[20px]"
+                    :src="getPathOfThePicture(game, 'secondThreeOfRuines')"
                     alt=""
                   />
-                </figure>
-                <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure>
-                <figure v-if="getPlayerInTheMatch(game).item5">
-                  <img
-                    class="h-[34px] w-[34px] rounded-[6%]"
-                    :src="`/14.4/img/item/${getPlayerInTheMatch(game).item5}.png`"
-                    alt=""
-                  />
-                </figure>
-                <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure>
-                <div class="ward">
-                  <figure v-if="getPlayerInTheMatch(game).item6">
+                </div>
+                <div class="kda flex items-center ml-12">
+                  <span> 1 / </span>
+                  <span> 4 / </span>
+                  <span> 0 </span>
+                </div>
+              </div>
+              <div class="items_and_ward">
+                <div class="items_wrapper flex gap-2">
+                  <figure v-if="getPlayerInTheMatch(game).item0">
                     <img
-                      class="h-[34px] w-[34px]"
-                      :src="`/14.4/img/item/${getPlayerInTheMatch(game).item6}.png`"
+                      class="h-[34px] w-[34px] rounded-[6%]"
+                      :src="`/14.4/img/item/${
+                        getPlayerInTheMatch(game).item0
+                      }.png`"
                       alt=""
                     />
                   </figure>
                   <figure v-else>
-                 <div class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30">
-                 </div>
-                </figure> 
+                    <div
+                      class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                    ></div>
+                  </figure>
+                  <figure v-if="getPlayerInTheMatch(game).item1">
+                    <img
+                      class="h-[34px] w-[34px] rounded-[6%]"
+                      :src="`/14.4/img/item/${
+                        getPlayerInTheMatch(game).item1
+                      }.png`"
+                      alt=""
+                    />
+                  </figure>
+                  <figure v-else>
+                    <div
+                      class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                    ></div>
+                  </figure>
+                  <figure v-if="getPlayerInTheMatch(game).item2">
+                    <img
+                      class="h-[34px] w-[34px] rounded-[6%]"
+                      :src="`/14.4/img/item/${
+                        getPlayerInTheMatch(game).item2
+                      }.png`"
+                      alt=""
+                    />
+                  </figure>
+                  <figure v-else>
+                    <div
+                      class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                    ></div>
+                  </figure>
+                  <figure v-if="getPlayerInTheMatch(game).item3">
+                    <img
+                      class="h-[34px] w-[34px] rounded-[6%]"
+                      :src="`/14.4/img/item/${
+                        getPlayerInTheMatch(game).item3
+                      }.png`"
+                      alt=""
+                    />
+                  </figure>
+                  <figure v-else>
+                    <div
+                      class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                    ></div>
+                  </figure>
+                  <figure v-if="getPlayerInTheMatch(game).item4">
+                    <img
+                      class="h-[34px] w-[34px] rounded-[6%]"
+                      :src="`/14.4/img/item/${
+                        getPlayerInTheMatch(game).item4
+                      }.png`"
+                      alt=""
+                    />
+                  </figure>
+                  <figure v-else>
+                    <div
+                      class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                    ></div>
+                  </figure>
+                  <figure v-if="getPlayerInTheMatch(game).item5">
+                    <img
+                      class="h-[34px] w-[34px] rounded-[6%]"
+                      :src="`/14.4/img/item/${
+                        getPlayerInTheMatch(game).item5
+                      }.png`"
+                      alt=""
+                    />
+                  </figure>
+                  <figure v-else>
+                    <div
+                      class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                    ></div>
+                  </figure>
+                  <div class="ward">
+                    <figure v-if="getPlayerInTheMatch(game).item6">
+                      <img
+                        class="h-[34px] w-[34px]"
+                        :src="`/14.4/img/item/${
+                          getPlayerInTheMatch(game).item6
+                        }.png`"
+                        alt=""
+                      />
+                    </figure>
+                    <figure v-else>
+                      <div
+                        class="h-[34px] w-[34px] rounded-[6%] backdrop-blur-sm bg-white/30"
+                      ></div>
+                    </figure>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div
-            class="cs_wards w-[20%] flex flex-col justify-center text-center border-l-[1px] border-white ml-14 bl"
-          >
-            <span> Control Ward: 0 </span>
-            <span> CS: 102 (6.7) </span>
-            <span> Ward Palced: 12 </span>
-            <span> Damage: 41000</span>
-          </div>
-          <div class="teams_wrapper flex gap-5 w-[30%] justify-end mr-2">
-            <div class="team_1_with_champ_icon flex flex-col justify-center">
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Aatrox.png"
-                  alt=""
-                />
-                <span> Nicholas </span>
+            <div
+              class="cs_wards w-[20%] flex flex-col justify-center text-center border-l-[1px] border-white ml-14 bl"
+            >
+              <span>
+                CS:
+                {{ getTotalCs(game) }} ({{
+                  (getTotalCs(game) / getMinutesOfGameDuration(game)).toFixed(
+                    1
+                  )
+                }})</span
+              >
+              <span>
+                Control Ward:
+                {{ getPlayerInTheMatch(game).visionWardsBoughtInGame }}
+              </span>
+
+              <span>
+                Ward Palced: {{ getPlayerInTheMatch(game).wardsPlaced }}</span
+              >
+              <span>
+                Damage:
+                {{
+                  getPlayerInTheMatch(game).totalDamageDealtToChampions
+                }}</span
+              >
+              <span>
+                Vision Score: {{ getPlayerInTheMatch(game).visionScore }}</span
+              >
+            </div>
+            <div class="teams_wrapper flex gap-5 w-[30%] justify-end mr-2">
+              <div class="team_1_with_champ_icon flex flex-col justify-center">
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Aatrox.png"
+                    alt=""
+                  />
+                  <span> Nicholas </span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Ahri.png"
+                    alt=""
+                  />
+                  <span> Zuuwu</span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Akali.png"
+                    alt=""
+                  />
+                  <span> LucyLiu</span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Camille.png"
+                    alt=""
+                  />
+                  <span> Kiting Deft</span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Fizz.png"
+                    alt=""
+                  />
+                  <span> Flashpowa</span>
+                </div>
               </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Ahri.png"
-                  alt=""
-                />
-                <span> Zuuwu</span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Akali.png"
-                  alt=""
-                />
-                <span> LucyLiu</span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Camille.png"
-                  alt=""
-                />
-                <span> Kiting Deft</span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Fizz.png"
-                  alt=""
-                />
-                <span> Flashpowa</span>
+              <div class="team_2_with_champ_icon flex flex-col justify-center">
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Braum.png"
+                    alt=""
+                  />
+                  <span> CloneDH </span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Caitlyn.png"
+                    alt=""
+                  />
+                  <span> WS Tonto</span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Brand.png"
+                    alt=""
+                  />
+                  <span> Peix</span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Vayne.png"
+                    alt=""
+                  />
+                  <span> Lando</span>
+                </div>
+                <div class="player_with_champ_icon flex gap-1">
+                  <img
+                    class="h-[18px] w-[18px]"
+                    src="/public/14.4/img/champion/Aphelios.png"
+                    alt=""
+                  />
+                  <span> TΛUGREK</span>
+                </div>
               </div>
             </div>
-            <div class="team_2_with_champ_icon flex flex-col justify-center">
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Braum.png"
-                  alt=""
-                />
-                <span> CloneDH </span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Caitlyn.png"
-                  alt=""
-                />
-                <span> WS Tonto</span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Brand.png"
-                  alt=""
-                />
-                <span> Peix</span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Vayne.png"
-                  alt=""
-                />
-                <span> Lando</span>
-              </div>
-              <div class="player_with_champ_icon flex gap-1">
-                <img
-                  class="h-[18px] w-[18px]"
-                  src="/public/14.4/img/champion/Aphelios.png"
-                  alt=""
-                />
-                <span> TΛUGREK</span>
-              </div>
-            </div>
-          </div>
           </div>
         </template>
       </div>
