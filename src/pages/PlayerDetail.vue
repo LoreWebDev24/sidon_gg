@@ -166,7 +166,7 @@ onMounted(async () => {
           <div
             v-if="game.info.endOfGameResult === 'GameComplete'"
             :key="i"
-            class="single_game_details h-[130px] rounded flex p-3"
+            class="single_game_details h-[160px] rounded flex p-6"
             :class="getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'"
           >
             <div class="ml-4 game_info flex flex-col w-[20%] justify-center">
@@ -219,9 +219,9 @@ onMounted(async () => {
                   />
                 </div>
                 <div class="kda flex items-center ml-12">
-                  <span> 1 / </span>
-                  <span> 4 / </span>
-                  <span> 0 </span>
+                  <span> {{getPlayerInTheMatch(game).kills}} / </span>
+                  <span> {{getPlayerInTheMatch(game).deaths}} / </span>
+                  <span> {{getPlayerInTheMatch(game).assists}} </span>
                 </div>
               </div>
               <div class="items_and_ward">
@@ -359,89 +359,20 @@ onMounted(async () => {
                 Vision Score: {{ getPlayerInTheMatch(game).visionScore }}</span
               >
             </div>
-            <div class="teams_wrapper flex gap-5 w-[30%] justify-end mr-2">
-              <div class="team_1_with_champ_icon flex flex-col justify-center">
-                <div class="player_with_champ_icon flex gap-1">
+            <div class="teams_wrapper w-[30%] mr-2">
+              <div
+                class="teams_with_champ_icon grid grid-rows-5 grid-cols-2"
+              >
+                <div
+                  v-for="partecipantOfTheGame in game.info.participants"
+                  class="player_with_champ_icon flex gap-2"
+                >
                   <img
                     class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Aatrox.png"
-                    alt=""
+                    :src="`/public/14.4/img/champion/${partecipantOfTheGame.championName}.png`"
+                    alt="champion_image"
                   />
-                  <span> Nicholas </span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Ahri.png"
-                    alt=""
-                  />
-                  <span> Zuuwu</span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Akali.png"
-                    alt=""
-                  />
-                  <span> LucyLiu</span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Camille.png"
-                    alt=""
-                  />
-                  <span> Kiting Deft</span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Fizz.png"
-                    alt=""
-                  />
-                  <span> Flashpowa</span>
-                </div>
-              </div>
-              <div class="team_2_with_champ_icon flex flex-col justify-center">
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Braum.png"
-                    alt=""
-                  />
-                  <span> CloneDH </span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Caitlyn.png"
-                    alt=""
-                  />
-                  <span> WS Tonto</span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Brand.png"
-                    alt=""
-                  />
-                  <span> Peix</span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Vayne.png"
-                    alt=""
-                  />
-                  <span> Lando</span>
-                </div>
-                <div class="player_with_champ_icon flex gap-1">
-                  <img
-                    class="h-[18px] w-[18px]"
-                    src="/public/14.4/img/champion/Aphelios.png"
-                    alt=""
-                  />
-                  <span> TΛUGREK</span>
+                  <span> {{ partecipantOfTheGame.riotIdGameName }} </span>
                 </div>
               </div>
             </div>
