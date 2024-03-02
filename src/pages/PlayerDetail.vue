@@ -5,12 +5,13 @@ import { useRouter } from "vue-router";
 const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
 const PUUID = ref("");
-// let matchResult = ref("");
-// const runesArray = ref([]);
+
+
 function getPlayerInTheMatch(game) {
   let partecipant = game.info.participants.find((p) => p.puuid === PUUID.value);
   return partecipant;
 }
+
 function getPathOfThePicture(game, type) {
   const participant = getPlayerInTheMatch(game);
   let runes = undefined;
@@ -32,14 +33,6 @@ function getMinutesOfGameDuration(game) {
   const minutes = seconds / 60;
   return minutes;
 }
-
-// function getPlayerChampionPicture(game){
-//   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
-//   if(participant === undefined) {
-//     return
-//   }
-//   return "/14.4/img/champion/" + participant.championName + '.png'
-// }
 
 function getPlayerSummonerSpellOne(game) {
   let participant = getPlayerInTheMatch(game);
@@ -64,24 +57,6 @@ function getTotalCs(game) {
     partecipant.totalMinionsKilled + partecipant.neutralMinionsKilled
   );
 }
-
-// function getPlayerFirstRune(game) {
-//   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
-//   if(participant === undefined) {
-//     return
-//   }
-//   let mainRune = participant.perks.styles[0].selections[0].perk
-//   return "/14.4/img/runes/" + mainRune + '.png'
-// }
-
-// function getPlayerSecondThreeOfRuines(game) {
-//   let participant = game.info.participants.find(p => p.puuid === PUUID.value);
-//   if(participant === undefined) {
-//     return
-//   }
-//   let mainRune = participant.perks.styles[1].style
-//   return "/14.4/img/runes/" + mainRune + '.png'
-// }
 
 function getmatchResult(game) {
   const participant = getPlayerInTheMatch(game);
@@ -128,14 +103,6 @@ function formattDamages(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-// function daysAgoFromTimestamp(timestamp) {
-//   const currentTimestamp = new Date().getTime();
-//   const differenceInMillis = currentTimestamp - timestamp;
-//   const daysAgo = Math.floor(differenceInMillis / (1000 * 60 * 60 * 24));
-
-//   return daysAgo;
-// }
-
 onMounted(async () => {
   await axios
     .get("http://localhost:4000/past10Games", {
@@ -178,14 +145,14 @@ onMounted(async () => {
           <div
             v-if="game.info.endOfGameResult === 'GameComplete'"
             :key="i"
-            class="single_game_details h-[160px] rounded flex p-6 w-[1200px]"
+            class="single_game_details h-[160px] rounded flex p-6 w-[1000px]"
             :class="getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'"
           >
             <div
-              class="ml-4 game_info flex flex-col w-[20%] justify-center text-sm"
+              class="ml-4 game_info flex flex-col w-[15%] justify-center text-sm"
             >
               <span
-                class="text-right mb-5 mr-12 text-[16px]"
+                class="mb-6 text-[18px] font-bold"
                 :class="[
                   getmatchResult(game) === true
                     ? 'text-[#5383E8] '
@@ -194,15 +161,15 @@ onMounted(async () => {
               >
                 {{ getmatchResult(game) ? "VICTORY" : "DEFEAT" }}
               </span>
-              <span> {{ game.info.gameMode }} GAME </span>
-              <span>
+              <span class="font-bold mb-4"> {{ game.info.gameMode }} GAME </span>
+              <span class="font-bold text-[16px]">
                 {{
                   new Date(game.info.gameDuration * 1000)
                     .toISOString()
                     .slice(14, 19)
                 }}
               </span>
-              <span> {{ timestampToDate(game.info.gameEndTimestamp) }} </span>
+              <!--   -->
             </div>
             <div class="wrapper_kda_and_items flex flex-col w-[30%] gap-3">
               <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
@@ -239,7 +206,7 @@ onMounted(async () => {
                     alt=""
                   />
                 </div>
-                <div class="kda flex items-center w-[160px] justify-center">
+                <div class="kda flex items-center w-[160px] justify-center font-extrabold text-[17px]">
                   <span> {{ getPlayerInTheMatch(game).kills }}</span>
                   <span>/ </span>
                   <span> {{ getPlayerInTheMatch(game).deaths }}</span>
@@ -356,13 +323,19 @@ onMounted(async () => {
             <div
               class="cs_wards w-[20%] flex flex-col justify-center text-center border-l-[1px] border-r-[1px] border-white ml-14 bl text-sm"
             >
-              <span>
+              <span class="font-extrabold">
                 CS:
                 {{ getTotalCs(game) }} ({{
                   (getTotalCs(game) / getMinutesOfGameDuration(game)).toFixed(
                     1
                   )
                 }})</span
+              >
+              <span class="font-bold">
+                Damage:
+                {{
+                  formattDamages(getPlayerInTheMatch(game).totalDamageDealtToChampions)
+                }}</span
               >
               <span>
                 Control Ward:
@@ -371,12 +344,6 @@ onMounted(async () => {
 
               <span>
                 Ward Palced: {{ getPlayerInTheMatch(game).wardsPlaced }}</span
-              >
-              <span>
-                Damage:
-                {{
-                  getPlayerInTheMatch(game).totalDamageDealtToChampions
-                }}</span
               >
               <span>
                 Vision Score: {{ getPlayerInTheMatch(game).visionScore }}</span
