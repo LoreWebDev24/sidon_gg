@@ -6,7 +6,6 @@ const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
 const PUUID = ref("");
 
-
 function getPlayerInTheMatch(game) {
   let partecipant = game.info.participants.find((p) => p.puuid === PUUID.value);
   return partecipant;
@@ -67,6 +66,44 @@ function replaceHashWithSlash(inputString) {
   const stringWithoutHash = inputString.replace(/TAG/g, "/");
 
   return stringWithoutHash;
+}
+
+function getTypeOfGame(game) {
+  const queID = game.info.queueId;
+  const gameTypes = [
+    {
+      id: 400,
+      matchType: "Normal Draft",
+    },
+    {
+      id: 420,
+      matchType: "Ranked Solo/Duo",
+    },
+    {
+      id: 1900,
+      matchType: "URF",
+    },
+  ];
+  for (let i = 0; i < gameTypes.length; i++) {
+    if (gameTypes[i].id === queID) {
+      const gameString = gameTypes[i].matchType;
+      console.log(gameString);
+      return gameString;
+    }
+  }
+  for (let i = 0; i < gameTypes.length; i++) {
+    if (gameTypes[i].id !== queID) {
+      return "Normal";
+    }
+  }
+}
+
+function getKdaStat(game) {
+  const kills = getPlayerInTheMatch(game).kills;
+  const deaths = getPlayerInTheMatch(game).deaths;
+  const assists = getPlayerInTheMatch(game).assists;
+
+  return ((kills + assists) / deaths).toFixed(1);
 }
 
 function timestampToDate(timestamp) {
@@ -161,7 +198,9 @@ onMounted(async () => {
               >
                 {{ getmatchResult(game) ? "VICTORY" : "DEFEAT" }}
               </span>
-              <span class="font-bold mb-4"> {{ game.info.gameMode }} GAME </span>
+              <span class="font-bold mb-4">
+                {{ getTypeOfGame(game) }}
+              </span>
               <span class="font-bold text-[16px]">
                 {{
                   new Date(game.info.gameDuration * 1000)
@@ -174,11 +213,16 @@ onMounted(async () => {
             <div class="wrapper_kda_and_items flex flex-col w-[30%] gap-3">
               <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
                 <div class="flex justify-center items-center">
-                  <img
-                    class="w-[60px] h-[60px] rounded-[50%]"
-                    :src="getPathOfThePicture(game, 'champion')"
-                    alt=""
-                  />
+                  <div class="image_and_level_wrapper relative">
+                    <div class="player_level absolute bg w-[20] h-[20] bg-[#202D37] rounded-2xl flex items-center justify-center bottom-0 right-0 font-bold text-sm">
+                      {{ getPlayerInTheMatch(game).champLevel }}
+                    </div>
+                    <img
+                      class="w-[60px] h-[60px] rounded-[50%]"
+                      :src="getPathOfThePicture(game, 'champion')"
+                      alt=""
+                    />
+                  </div>
                 </div>
                 <div class="ml-3 summoner_spells flex justify-center flex-col">
                   <img
@@ -206,13 +250,20 @@ onMounted(async () => {
                     alt=""
                   />
                 </div>
-                <div class="kda flex items-center w-[160px] justify-center font-extrabold text-[17px]">
-                  <span> {{ getPlayerInTheMatch(game).kills }}</span>
+                <div
+                  class="kda flex items-center w-[160px] justify-center font-extrabold text-[17px]"
+                >
+                  <span>
+                    {{ getPlayerInTheMatch(game).kills }} <span></span
+                  ></span>
                   <span>/ </span>
                   <span> {{ getPlayerInTheMatch(game).deaths }}</span>
                   <span>/ </span>
                   <span> {{ getPlayerInTheMatch(game).assists }}</span>
                 </div>
+                <span class="text-xs text-center flex items-center"
+                  >{{ getKdaStat(game) }} KDA</span
+                >
               </div>
               <div class="items_and_ward">
                 <div class="items_wrapper flex gap-2">
@@ -334,7 +385,9 @@ onMounted(async () => {
               <span class="font-bold">
                 Damage:
                 {{
-                  formattDamages(getPlayerInTheMatch(game).totalDamageDealtToChampions)
+                  formattDamages(
+                    getPlayerInTheMatch(game).totalDamageDealtToChampions
+                  )
                 }}</span
               >
               <span>
@@ -348,6 +401,34 @@ onMounted(async () => {
               <span>
                 Vision Score: {{ getPlayerInTheMatch(game).visionScore }}</span
               >
+              <div
+                class="w-[78px] h-[14px] bg-red-600 flex items-center justify-center text-white rounded-md text-xs my-1 mx-auto"
+                v-if="
+                  getPlayerInTheMatch(game).pentaKills !== 0 ||
+                  getPlayerInTheMatch(game).quadraKills !== 0 ||
+                  getPlayerInTheMatch(game).tripleKills !== 0
+                "
+              >
+                <div
+                  v-if="
+                    getPlayerInTheMatch(game).pentaKills === 0 &&
+                    getPlayerInTheMatch(game).quadraKills === 0
+                  "
+                >
+                  <span>Triple Kill</span>
+                </div>
+                <div
+                  v-if="
+                    getPlayerInTheMatch(game).pentaKills === 0 &&
+                    getPlayerInTheMatch(game).quadraKills > 0
+                  "
+                >
+                  <span>Quadra Kill</span>
+                </div>
+                <div v-if="getPlayerInTheMatch(game).pentaKills > 0">
+                  <span>Pentakiller</span>
+                </div>
+              </div>
             </div>
             <div class="teams_wrapper w-[30%] flex justify-end">
               <div class="teams_with_champ_icon">
@@ -357,7 +438,7 @@ onMounted(async () => {
                 >
                   <img
                     class="h-[18px] w-[18px]"
-                    :src="`/public/14.4/img/champion/${partecipantOfTheGame.championName}.png`"
+                    :src="`/14.4/img/champion/${partecipantOfTheGame.championName}.png`"
                     alt="champion_image"
                   />
                   <span class="">
