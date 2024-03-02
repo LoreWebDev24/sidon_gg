@@ -130,7 +130,7 @@ function timestampToDate(timestamp) {
 
 function formatNicknameForTeamsDisplay(str) {
   if (str.length > 12) {
-    return str.substring(0, 12) + "...";
+    return str.substring(0, 11) + "...";
   } else {
     return str;
   }
@@ -214,7 +214,7 @@ onMounted(async () => {
               <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
                 <div class="flex justify-center items-center">
                   <div class="image_and_level_wrapper relative">
-                    <div class="player_level absolute bg w-[20] h-[20] bg-[#202D37] rounded-2xl flex items-center justify-center bottom-0 right-0 font-bold text-sm">
+                    <div class="player_level absolute bg min-w-[20px] min-h-[20px] bg-[#202D37] rounded-2xl flex items-center justify-center bottom-0 right-0 font-bold text-sm">
                       {{ getPlayerInTheMatch(game).champLevel }}
                     </div>
                     <img
