@@ -4,11 +4,21 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
+const rankedInfos = ref([]);
 const PUUID = ref("");
+const SUMMONER_ID = ref("");
+// const SUMMONER_ID = getSummonerID();
 
 function getPlayerInTheMatch(game) {
   let partecipant = game.info.participants.find((p) => p.puuid === PUUID.value);
   return partecipant;
+}
+
+function getImageOfSoloQueRank() {
+  let soloQueRank = rankedInfos.value.find((r) => r.queueType === 'RANKED_SOLO_5x5');
+  console.log(soloQueRank)
+  return "/14.4/img/ranks/" + soloQueRank + ".png"
+
 }
 
 function getPathOfThePicture(game, type) {
@@ -106,31 +116,31 @@ function getKdaStat(game) {
   return ((kills + assists) / deaths).toFixed(1);
 }
 
-function timestampToDate(timestamp) {
-  const date = new Date(timestamp);
+// function timestampToDate(timestamp) {
+//   const date = new Date(timestamp);
 
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
+//   const year = date.getFullYear();
+//   const month = date.getMonth() + 1;
+//   const day = date.getDate();
+//   const hours = date.getHours();
+//   const minutes = date.getMinutes();
+//   const seconds = date.getSeconds();
 
-  const formattedDate = `${month < 10 ? "0" + month : month}-${
-    day < 10 ? "0" + day : day
-  }`;
-  const formattedTime = `${hours < 10 ? "0" + hours : hours}:${
-    minutes < 10 ? "0" + minutes : minutes
-  }`;
+//   const formattedDate = `${month < 10 ? "0" + month : month}-${
+//     day < 10 ? "0" + day : day
+//   }`;
+//   const formattedTime = `${hours < 10 ? "0" + hours : hours}:${
+//     minutes < 10 ? "0" + minutes : minutes
+//   }`;
 
-  const formattedDateTime = `${formattedDate} ${formattedTime}`;
+//   const formattedDateTime = `${formattedDate} ${formattedTime}`;
 
-  return formattedDateTime;
-}
+//   return formattedDateTime;
+// }
 
 function formatNicknameForTeamsDisplay(str) {
   if (str.length > 12) {
-    return str.substring(0, 11) + "...";
+    return str.substring(0, 10) + "...";
   } else {
     return str;
   }
@@ -143,15 +153,33 @@ function formattDamages(num) {
 onMounted(async () => {
   await axios
     .get("http://localhost:4000/past10Games", {
-      params: { username: replaceHashWithSlash(slug) },
+      params: {
+        username: replaceHashWithSlash(slug),
+        summonerID: SUMMONER_ID.value,
+      },
     })
     .then((resp) => {
       playerGames.value = resp.data[0];
       PUUID.value = resp.data[1];
-      console.log(playerGames.value, PUUID.value);
+      SUMMONER_ID.value = resp.data[2];
+      console.log(playerGames.value, PUUID.value, SUMMONER_ID.value);
       console.log(slug);
       console.log(replaceHashWithSlash(slug));
       console.log(typeof replaceHashWithSlash(slug));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+  await axios
+    .get("http://localhost:4000/summonerRankedInfos", {
+      params: {
+        summonerID: SUMMONER_ID.value,
+      },
+    })
+    .then((resp) => {
+      rankedInfos.value = resp.data
+      console.log(rankedInfos.value)
     })
     .catch((error) => {
       console.log(error);
@@ -174,10 +202,10 @@ onMounted(async () => {
 
 <template>
   <section
-    class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1]"
+    class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1] flex justify-around"
   >
-    <div class="container my-0 mx-auto">
-      <div class="games_detail_wrapper grid gap-7 justify-center">
+    <div class="container w-[1000px]">
+      <div class="games_detail_wrapper grid gap-7 w-[1000px]">
         <template v-for="(game, i) in playerGames">
           <div
             v-if="game.info.endOfGameResult === 'GameComplete'"
@@ -214,11 +242,13 @@ onMounted(async () => {
               <div class="icons_and_kda flex w-[100%] h-[50%] mt-2">
                 <div class="flex justify-center items-center">
                   <div class="image_and_level_wrapper relative">
-                    <div class="player_level absolute bg min-w-[20px] min-h-[20px] bg-[#202D37] rounded-2xl flex items-center justify-center bottom-0 right-0 font-bold text-sm">
+                    <div
+                      class="player_level absolute bg min-w-[20px] min-h-[20px] bg-[#202D37] rounded-2xl flex items-center justify-center bottom-0 right-0 font-bold text-sm"
+                    >
                       {{ getPlayerInTheMatch(game).champLevel }}
                     </div>
                     <img
-                      class="w-[60px] h-[60px] rounded-[50%]"
+                      class="w-[60px] h-[50px] rounded-[50%]"
                       :src="getPathOfThePicture(game, 'champion')"
                       alt=""
                     />
@@ -226,12 +256,12 @@ onMounted(async () => {
                 </div>
                 <div class="ml-3 summoner_spells flex justify-center flex-col">
                   <img
-                    class="w-[26px] rounded-[20%]"
+                    class="w-[28px] rounded-[20%]"
                     :src="getPlayerSummonerSpellOne(game)"
                     alt=""
                   />
                   <img
-                    class="w-[26px] rounded-[20%]"
+                    class="w-[28px] rounded-[20%]"
                     :src="getPlayerSummonerSpellTwo(game)"
                     alt=""
                   />
@@ -240,12 +270,12 @@ onMounted(async () => {
                   class="ruines flex flex-col justify-center ml-3 items-center"
                 >
                   <img
-                    class="h-[35px] w-[35px]"
+                    class="h-[35px] w-[40px]"
                     :src="getPathOfThePicture(game, 'mainRune')"
                     alt=""
                   />
                   <img
-                    class="h-[20px] w-[20px]"
+                    class="h-[16px] w-[18px]"
                     :src="getPathOfThePicture(game, 'secondThreeOfRuines')"
                     alt=""
                   />
@@ -437,7 +467,7 @@ onMounted(async () => {
                   class="player_with_champ_icon flex gap-2 w-[130px] text-sm"
                 >
                   <img
-                    class="h-[18px] w-[18px]"
+                    class="h-[18px] w-[18px] rounded-[6%]"
                     :src="`/14.4/img/champion/${partecipantOfTheGame.championName}.png`"
                     alt="champion_image"
                   />
@@ -453,6 +483,19 @@ onMounted(async () => {
             </div>
           </div>
         </template>
+      </div>
+    </div>
+    <div class="container w-[600px]">
+      <div
+        class="player_general_details text-center flex justify-center flex-col gap-3 items-center"
+      >
+        <img
+          class="w-[200px] h-[200px] rounded-md"
+          :src="`/14.4/img/profileicon/${{}} .png`"
+          alt=""
+        />
+        <h2>Flashpowa #Flash</h2>
+        <img :src="getImageOfSoloQueRank()" alt="">
       </div>
     </div>
   </section>
