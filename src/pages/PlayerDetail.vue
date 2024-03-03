@@ -4,9 +4,12 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
+const soloQueInfo = ref([]);
 const rankedInfos = ref([]);
 const PUUID = ref("");
 const SUMMONER_ID = ref("");
+let rankImagePath = ref("");
+let summonerIcon = ref("");
 // const SUMMONER_ID = getSummonerID();
 
 function getPlayerInTheMatch(game) {
@@ -14,11 +17,29 @@ function getPlayerInTheMatch(game) {
   return partecipant;
 }
 
-function getImageOfSoloQueRank() {
-  let soloQueRank = rankedInfos.value.find((r) => r.queueType === 'RANKED_SOLO_5x5');
-  console.log(soloQueRank)
-  return "/14.4/img/ranks/" + soloQueRank + ".png"
+function getSummonerIcon() {
+  const player = playerGames.value[0].info.participants.find(
+    (p) => p.puuid === PUUID.value
+  );
+  const icon = player.profileIcon;
+  return "/14.4/img/profileicon/" + icon + ".png";
+}
 
+function getWinRateInSoloQue() {
+  let wins = soloQueInfo.value.wins;
+  let losses = soloQueInfo.value.losses;
+  let totalSoloQueGames = wins + losses;
+  let winRate = ((wins / totalSoloQueGames)* 100).toFixed(2);
+  console.log(wins, losses, totalSoloQueGames,winRate);
+  return winRate
+}
+
+function getImageOfSoloQueRank() {
+  let soloQueRank = rankedInfos.value.find(
+    (element) => element.queueType == "RANKED_SOLO_5x5"
+  );
+
+  return "/14.4/img/ranks/" + soloQueRank.tier + ".png";
 }
 
 function getPathOfThePicture(game, type) {
@@ -139,8 +160,8 @@ function getKdaStat(game) {
 // }
 
 function formatNicknameForTeamsDisplay(str) {
-  if (str.length > 12) {
-    return str.substring(0, 10) + "...";
+  if (str.length > 14) {
+    return str.substring(0, 11) + "...";
   } else {
     return str;
   }
@@ -178,8 +199,13 @@ onMounted(async () => {
       },
     })
     .then((resp) => {
-      rankedInfos.value = resp.data
-      console.log(rankedInfos.value)
+      rankedInfos.value = resp.data;
+      soloQueInfo.value = resp.data.find(
+        (element) => element.queueType == "RANKED_SOLO_5x5"
+      );
+      console.log(rankedInfos.value);
+      rankImagePath.value = getImageOfSoloQueRank();
+      summonerIcon.value = getSummonerIcon();
     })
     .catch((error) => {
       console.log(error);
@@ -210,7 +236,7 @@ onMounted(async () => {
           <div
             v-if="game.info.endOfGameResult === 'GameComplete'"
             :key="i"
-            class="single_game_details h-[160px] rounded flex p-6 w-[1000px]"
+            class="single_game_details h-[160px] rounded flex p-6 w-[1100px]"
             :class="getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'"
           >
             <div
@@ -460,11 +486,11 @@ onMounted(async () => {
                 </div>
               </div>
             </div>
-            <div class="teams_wrapper w-[30%] flex justify-end">
+            <div class="teams_wrapper w-[35%] flex justify-center">
               <div class="teams_with_champ_icon">
                 <div
                   v-for="partecipantOfTheGame in game.info.participants"
-                  class="player_with_champ_icon flex gap-2 w-[130px] text-sm"
+                  class="player_with_champ_icon flex gap-2 w-[130px] text-sm whitespace-nowrap"
                 >
                   <img
                     class="h-[18px] w-[18px] rounded-[6%]"
@@ -485,17 +511,21 @@ onMounted(async () => {
         </template>
       </div>
     </div>
-    <div class="container w-[600px]">
+    <div v-if="playerGames.length > 0" class="container w-[600px]">
       <div
         class="player_general_details text-center flex justify-center flex-col gap-3 items-center"
       >
         <img
-          class="w-[200px] h-[200px] rounded-md"
-          :src="`/14.4/img/profileicon/${{}} .png`"
+          class="w-[200px] h-[200px] rounded-[1rem] mb-4"
+          :src="summonerIcon"
           alt=""
         />
-        <h2>Flashpowa #Flash</h2>
-        <img :src="getImageOfSoloQueRank()" alt="">
+        <h1>{{ soloQueInfo.summonerName}}</h1>
+        <img class="w-[240px]" :src="rankImagePath" alt="" />
+        <h3>{{ soloQueInfo.tier}} {{ soloQueInfo.rank }}</h3>
+        <h3>{{ soloQueInfo.leaguePoints }} LP</h3>
+        <h3>{{ soloQueInfo.wins }} WIN  {{ soloQueInfo.losses  }} LOSE</h3>
+        <h3>WR {{ getWinRateInSoloQue()}} %</h3>
       </div>
     </div>
   </section>
