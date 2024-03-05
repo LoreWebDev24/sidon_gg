@@ -10,6 +10,7 @@ const rankedInfos = ref([]);
 const PUUID = ref("");
 const SUMMONER_ID = ref("");
 let rankImagePath = ref("");
+let flexRankImage = ref("");
 let summonerIcon = ref("");
 let isSoloQue = ref(true);
 // let isFlex = false;
@@ -39,10 +40,19 @@ function getWinRateInSoloQue() {
 
 function getImageOfSoloQueRank() {
   let soloQueRank = rankedInfos.value.find(
-    (element) => element.queueType == "RANKED_SOLO_5x5"
+    (element) => element.queueType === "RANKED_SOLO_5x5"
   );
 
   return "/14.4/img/ranks/" + soloQueRank.tier + ".png";
+}
+
+function getImageOfFlexRank() {
+  let flexRank = rankedInfos.value.find(
+    (element) => element.queueType === "RANKED_FLEX_SR"
+  );
+  console.log(flexRank.tier)
+
+  return "/14.4/img/ranks/" + flexRank.tier + ".png";
 }
 
 function getPathOfThePicture(game, type) {
@@ -150,6 +160,8 @@ function getKdaStat(game) {
   return ((kills + assists) / deaths).toFixed(1);
 }
 
+
+
 // function timestampToDate(timestamp) {
 //   const date = new Date(timestamp);
 
@@ -220,8 +232,9 @@ onMounted(async () => {
         (element) => element.queueType == "RANKED_FLEX_SR"
       );
       console.log(rankedInfos.value);
-      rankImagePath.value = getImageOfSoloQueRank();
       summonerIcon.value = getSummonerIcon();
+      rankImagePath.value = getImageOfSoloQueRank();
+      flexRankImage.value = getImageOfFlexRank();
     })
     .catch((error) => {
       console.log(error);
@@ -538,20 +551,22 @@ onMounted(async () => {
           alt=""
         />
         <h1>{{ replaceTAGWithHash(slug) }}</h1>
-        <div v-if="isSoloQue.value" class="rank_image_wrapper">
+        <div v-if="isSoloQue" class="rank_image_wrapper">
           <img class="w-[240px]" :src="rankImagePath" alt="" />
         </div>
         <div v-else>
-          <img class="w-[240px]" :src="rankImagePath" alt="" />
+          <img class="w-[240px]" :src="flexRankImage" alt="" />
         </div>
         <div class="ranked_info">
           <div class="ranked_buttons_wrapper flex">
             <div
+              @click="isSoloQue = true"
               class="soloQ_button h-[60px] w-[300px] flex justify-center items-center bg-[#31313C]"
             >
               <span>Solo Queue </span>
             </div>
             <div
+              @click="isSoloQue = false"
               class="flex_button h-[60px] w-[300px] flex justify-center items-center bg-[#31313C]"
             >
               <span>Flex</span>
@@ -563,7 +578,7 @@ onMounted(async () => {
             <h3>{{ soloQueInfo.wins }} WIN {{ soloQueInfo.losses }} LOSE</h3>
             <h3>WR {{ getWinRateInSoloQue() }} %</h3>
           </div>
-          <div v-else class="flex_info"  @click="console.log('pippo')">
+          <div v-else class="flex_info"  >
             <div class="flex_info_click">
               <h3>{{ flexInfo.tier }} {{ flexInfo.rank }}</h3>
               <h3>{{ flexInfo.leaguePoints }} LP</h3>
