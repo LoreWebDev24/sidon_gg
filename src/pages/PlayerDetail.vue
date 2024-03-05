@@ -5,11 +5,14 @@ import { useRouter } from "vue-router";
 const { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
 const soloQueInfo = ref([]);
+const flexInfo = ref([]);
 const rankedInfos = ref([]);
 const PUUID = ref("");
 const SUMMONER_ID = ref("");
 let rankImagePath = ref("");
 let summonerIcon = ref("");
+let isSoloQue = ref(true);
+// let isFlex = false;
 // const SUMMONER_ID = getSummonerID();
 
 function getPlayerInTheMatch(game) {
@@ -29,9 +32,9 @@ function getWinRateInSoloQue() {
   let wins = soloQueInfo.value.wins;
   let losses = soloQueInfo.value.losses;
   let totalSoloQueGames = wins + losses;
-  let winRate = ((wins / totalSoloQueGames)* 100).toFixed(2);
-  console.log(wins, losses, totalSoloQueGames,winRate);
-  return winRate
+  let winRate = ((wins / totalSoloQueGames) * 100).toFixed(2);
+  console.log(wins, losses, totalSoloQueGames, winRate);
+  return winRate;
 }
 
 function getImageOfSoloQueRank() {
@@ -99,6 +102,12 @@ function replaceHashWithSlash(inputString) {
   return stringWithoutHash;
 }
 
+function replaceTAGWithHash(inputString) {
+  const stringWithHash = inputString.replace(/TAG/g, "#");
+
+  return stringWithHash;
+}
+
 function getTypeOfGame(game) {
   const queID = game.info.queueId;
   const gameTypes = [
@@ -113,6 +122,10 @@ function getTypeOfGame(game) {
     {
       id: 1900,
       matchType: "URF",
+    },
+    {
+      id: 440,
+      matchType: "Flex 5V5",
     },
   ];
   for (let i = 0; i < gameTypes.length; i++) {
@@ -202,6 +215,9 @@ onMounted(async () => {
       rankedInfos.value = resp.data;
       soloQueInfo.value = resp.data.find(
         (element) => element.queueType == "RANKED_SOLO_5x5"
+      );
+      flexInfo.value = resp.data.find(
+        (element) => element.queueType == "RANKED_FLEX_SR"
       );
       console.log(rankedInfos.value);
       rankImagePath.value = getImageOfSoloQueRank();
@@ -511,21 +527,51 @@ onMounted(async () => {
         </template>
       </div>
     </div>
-    <div v-if="playerGames.length > 0" class="container w-[600px]">
+    <div v-if="playerGames.length > 0" class="container w-[600px] bg-[#515163]">
       <div
-        class="player_general_details text-center flex justify-center flex-col gap-3 items-center"
+        v-if="soloQueInfo"
+        class="player_general_details text-center flex justify-center flex-col gap-3 items-center py-20 px-5"
       >
         <img
           class="w-[200px] h-[200px] rounded-[1rem] mb-4"
           :src="summonerIcon"
           alt=""
         />
-        <h1>{{ soloQueInfo.summonerName}}</h1>
-        <img class="w-[240px]" :src="rankImagePath" alt="" />
-        <h3>{{ soloQueInfo.tier}} {{ soloQueInfo.rank }}</h3>
-        <h3>{{ soloQueInfo.leaguePoints }} LP</h3>
-        <h3>{{ soloQueInfo.wins }} WIN  {{ soloQueInfo.losses  }} LOSE</h3>
-        <h3>WR {{ getWinRateInSoloQue()}} %</h3>
+        <h1>{{ replaceTAGWithHash(slug) }}</h1>
+        <div v-if="isSoloQue.value" class="rank_image_wrapper">
+          <img class="w-[240px]" :src="rankImagePath" alt="" />
+        </div>
+        <div v-else>
+          <img class="w-[240px]" :src="rankImagePath" alt="" />
+        </div>
+        <div class="ranked_info">
+          <div class="ranked_buttons_wrapper flex">
+            <div
+              class="soloQ_button h-[60px] w-[300px] flex justify-center items-center bg-[#31313C]"
+            >
+              <span>Solo Queue </span>
+            </div>
+            <div
+              class="flex_button h-[60px] w-[300px] flex justify-center items-center bg-[#31313C]"
+            >
+              <span>Flex</span>
+            </div>
+          </div>
+          <div class="solo_que_info" v-if="isSoloQue">
+            <h3>{{ soloQueInfo.tier }} {{ soloQueInfo.rank }}</h3>
+            <h3>{{ soloQueInfo.leaguePoints }} LP</h3>
+            <h3>{{ soloQueInfo.wins }} WIN {{ soloQueInfo.losses }} LOSE</h3>
+            <h3>WR {{ getWinRateInSoloQue() }} %</h3>
+          </div>
+          <div v-else class="flex_info"  @click="console.log('pippo')">
+            <div class="flex_info_click">
+              <h3>{{ flexInfo.tier }} {{ flexInfo.rank }}</h3>
+              <h3>{{ flexInfo.leaguePoints }} LP</h3>
+              <h3>{{ flexInfo.wins }} WIN {{ flexInfo.losses }} LOSE</h3>
+              <!-- <h3>WR {{ getWinRateInSoloQue() }} %</h3> -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -535,7 +581,7 @@ onMounted(async () => {
 .teams_with_champ_icon {
   display: flex;
   flex-flow: column wrap;
-  gap: 2px 2px;
+  gap: 2px 14px;
   justify-content: center;
 }
 </style>
