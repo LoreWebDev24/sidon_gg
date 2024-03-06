@@ -538,7 +538,7 @@ onMounted(async () => {
         </template>
       </div>
     </div>
-    <div v-if="playerGames.length > 0" class="container w-[600px] bg-[#515163]">
+    <div v-if="playerGames.length > 0" class="container w-[600px] bg-[#5383E8] rounded-md">
       <div
         class="player_general_details text-center flex justify-center flex-col gap-3 items-center py-20 px-5"
       >
@@ -547,7 +547,7 @@ onMounted(async () => {
           :src="summonerIcon"
           alt=""
         />
-        <h1>{{ replaceTAGWithHash(slug) }}</h1>
+        <h1 class="text-xl font-bold">{{ replaceTAGWithHash(slug) }}</h1>
         <div class="rank_image_wrapper">
           <img class="w-[240px]" :src="isSoloQue ? rankImagePath : flexRankImage"  alt="" />
         </div>
@@ -555,19 +555,21 @@ onMounted(async () => {
           <div class="ranked_buttons_wrapper flex">
             <div
               @click="isSoloQue = true"
-              class="soloQ_button h-[60px] w-[300px] flex justify-center items-center bg-[#31313C]"
+              class="soloQ_button h-[60px] w-[300px] flex justify-center items-center"
+              :class="isSoloQue ? 'bg-[#515163]' : 'bg-[#31313C]'"
             >
               <span>Solo Queue </span>
             </div>
             <div
               @click="isSoloQue = false"
-              class="flex_button h-[60px] w-[300px] flex justify-center items-center bg-[#31313C]"
+              class="flex_button h-[60px] w-[300px] flex justify-center items-center"
+              :class="isSoloQue === false ? 'bg-[#515163]' : 'bg-[#31313C]'"
             >
               <span>Flex</span>
             </div>
           </div>
           <div class="solo_que_info" v-if="isSoloQue && soloQueInfo">
-            <ul>
+            <ul class="text-xl mt-12 font-bold">
               <li>{{ soloQueInfo.tier }} {{ soloQueInfo.rank }}</li>
               <li>{{ soloQueInfo.leaguePoints }} LP</li>
               <li>{{ soloQueInfo.wins }} WIN {{ soloQueInfo.losses }} LOSE</li>
@@ -576,7 +578,7 @@ onMounted(async () => {
           </div>
           <div v-if="isSoloQue === false && flexInfo" class="flex_info">
             <div class="flex_info_click">
-              <ul>
+              <ul class="text-xl mt-12 font-bold">
                 <li>{{ flexInfo.tier }} {{ flexInfo.rank }}</li>
                 <li>{{ flexInfo.leaguePoints }} LP</li>
                 <li>{{ flexInfo.wins }} WIN {{ flexInfo.losses }} LOSE</li>
