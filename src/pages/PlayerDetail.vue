@@ -13,6 +13,8 @@ let rankImagePath = ref("");
 let flexRankImage = ref("");
 let summonerIcon = ref("");
 let isSoloQue = ref(true);
+const unrankedImagePath = "/14.4/img/ranks/UNRANKED.webp";
+
 // let isFlex = false;
 // const SUMMONER_ID = getSummonerID();
 
@@ -39,20 +41,17 @@ function getWinRateInSoloQue() {
 }
 
 function getImageOfSoloQueRank() {
-  let soloQueRank = rankedInfos.value.find(
-    (element) => element.queueType === "RANKED_SOLO_5x5"
-  );
-
-  return "/14.4/img/ranks/" + soloQueRank.tier + ".png";
+  if (soloQueInfo.value) {
+    return "/14.4/img/ranks/" + soloQueInfo.value.tier + ".png";
+  }
+  return unrankedImagePath;
 }
 
 function getImageOfFlexRank() {
-  let flexRank = rankedInfos.value.find(
-    (element) => element.queueType === "RANKED_FLEX_SR"
-  );
-  console.log(flexRank.tier)
-
-  return "/14.4/img/ranks/" + flexRank.tier + ".png";
+  if (flexInfo.value) {
+    return "/14.4/img/ranks/" + flexInfo.value.tier + ".png";
+  }
+  return unrankedImagePath;
 }
 
 function getPathOfThePicture(game, type) {
@@ -160,8 +159,6 @@ function getKdaStat(game) {
   return ((kills + assists) / deaths).toFixed(1);
 }
 
-
-
 // function timestampToDate(timestamp) {
 //   const date = new Date(timestamp);
 
@@ -225,11 +222,12 @@ onMounted(async () => {
     })
     .then((resp) => {
       rankedInfos.value = resp.data;
+      console.log(resp.data);
       soloQueInfo.value = resp.data.find(
-        (element) => element.queueType == "RANKED_SOLO_5x5"
+        (element) => element.queueType === "RANKED_SOLO_5x5"
       );
       flexInfo.value = resp.data.find(
-        (element) => element.queueType == "RANKED_FLEX_SR"
+        (element) => element.queueType === "RANKED_FLEX_SR"
       );
       console.log(rankedInfos.value);
       summonerIcon.value = getSummonerIcon();
@@ -542,7 +540,6 @@ onMounted(async () => {
     </div>
     <div v-if="playerGames.length > 0" class="container w-[600px] bg-[#515163]">
       <div
-        v-if="soloQueInfo"
         class="player_general_details text-center flex justify-center flex-col gap-3 items-center py-20 px-5"
       >
         <img
@@ -551,11 +548,8 @@ onMounted(async () => {
           alt=""
         />
         <h1>{{ replaceTAGWithHash(slug) }}</h1>
-        <div v-if="isSoloQue" class="rank_image_wrapper">
-          <img class="w-[240px]" :src="rankImagePath" alt="" />
-        </div>
-        <div v-else>
-          <img class="w-[240px]" :src="flexRankImage" alt="" />
+        <div class="rank_image_wrapper">
+          <img class="w-[240px]" :src="isSoloQue ? rankImagePath : flexRankImage"  alt="" />
         </div>
         <div class="ranked_info">
           <div class="ranked_buttons_wrapper flex">
@@ -572,17 +566,21 @@ onMounted(async () => {
               <span>Flex</span>
             </div>
           </div>
-          <div class="solo_que_info" v-if="isSoloQue">
-            <h3>{{ soloQueInfo.tier }} {{ soloQueInfo.rank }}</h3>
-            <h3>{{ soloQueInfo.leaguePoints }} LP</h3>
-            <h3>{{ soloQueInfo.wins }} WIN {{ soloQueInfo.losses }} LOSE</h3>
-            <h3>WR {{ getWinRateInSoloQue() }} %</h3>
+          <div class="solo_que_info" v-if="isSoloQue && soloQueInfo">
+            <ul>
+              <li>{{ soloQueInfo.tier }} {{ soloQueInfo.rank }}</li>
+              <li>{{ soloQueInfo.leaguePoints }} LP</li>
+              <li>{{ soloQueInfo.wins }} WIN {{ soloQueInfo.losses }} LOSE</li>
+              <li>WR {{ getWinRateInSoloQue() }} %</li>
+            </ul>
           </div>
-          <div v-else class="flex_info"  >
+          <div v-if="isSoloQue === false && flexInfo" class="flex_info">
             <div class="flex_info_click">
-              <h3>{{ flexInfo.tier }} {{ flexInfo.rank }}</h3>
-              <h3>{{ flexInfo.leaguePoints }} LP</h3>
-              <h3>{{ flexInfo.wins }} WIN {{ flexInfo.losses }} LOSE</h3>
+              <ul>
+                <li>{{ flexInfo.tier }} {{ flexInfo.rank }}</li>
+                <li>{{ flexInfo.leaguePoints }} LP</li>
+                <li>{{ flexInfo.wins }} WIN {{ flexInfo.losses }} LOSE</li>
+              </ul>
               <!-- <h3>WR {{ getWinRateInSoloQue() }} %</h3> -->
             </div>
           </div>
