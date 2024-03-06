@@ -37,7 +37,15 @@ function getWinRateInSoloQue() {
   let totalSoloQueGames = wins + losses;
   let winRate = ((wins / totalSoloQueGames) * 100).toFixed(2);
   console.log(wins, losses, totalSoloQueGames, winRate);
-  return winRate;
+  return winRate
+}
+
+function getWinRateInFlex() {
+  let winsFlex = flexInfo.value.wins;
+  let lossesFlex = flexInfo.value.losses;
+  let totalFlexGames = winsFlex + lossesFlex;
+  let winRateFlex = ((winsFlex / totalFlexGames) * 100).toFixed(2);
+  return winRateFlex
 }
 
 function getImageOfSoloQueRank() {
@@ -582,8 +590,8 @@ onMounted(async () => {
                 <li>{{ flexInfo.tier }} {{ flexInfo.rank }}</li>
                 <li>{{ flexInfo.leaguePoints }} LP</li>
                 <li>{{ flexInfo.wins }} WIN {{ flexInfo.losses }} LOSE</li>
+                <li>WR {{ getWinRateInFlex() }} %</li>
               </ul>
-              <!-- <h3>WR {{ getWinRateInSoloQue() }} %</h3> -->
             </div>
           </div>
         </div>
