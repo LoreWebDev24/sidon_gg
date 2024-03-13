@@ -529,7 +529,7 @@ onMounted(async () => {
           :src="summonerIcon"
           alt=""
         />
-        <h1 class="text-xl font-bold">{{ decodeURIComponent(slug) }}</h1>
+        <h1 class="text-xl font-bold text-white">{{ decodeURIComponent(slug) }}</h1>
         <div class="rank_image_wrapper">
           <img class="w-[240px]" :src="isSoloQue ? rankImagePath : flexRankImage"  alt="" />
         </div>
