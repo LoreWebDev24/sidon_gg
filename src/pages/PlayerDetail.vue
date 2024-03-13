@@ -222,6 +222,26 @@ onMounted(async () => {
       console.log(error);
     });
 
+    // const playerDetail = await axios
+    // .get("http://localhost:4000/past10Games", {
+    //   params: {
+    //     username: replaceHashWithSlash(slug),
+    //     summonerID: SUMMONER_ID.value,
+    //   },
+    // })
+    // .then((resp) => {
+    //   playerGames.value = resp.data[0];
+    //   PUUID.value = resp.data[1];
+    //   SUMMONER_ID.value = resp.data[2];
+    //   console.log(playerGames.value, PUUID.value, SUMMONER_ID.value);
+    //   console.log(slug);
+    //   console.log(replaceHashWithSlash(slug));
+    //   console.log(typeof replaceHashWithSlash(slug));
+    // })
+    // .catch((error) => {
+    //   console.log(error);
+    // });
+
   await axios
     .get("http://localhost:4000/summonerRankedInfos", {
       params: {
@@ -263,6 +283,7 @@ onMounted(async () => {
 
 <template>
   <section
+  v-if="playerGames.length > 0"
     class="games_section bg-[#1C1C1F] pt-[100px] mb-[100px] text-[#9E9EB1] flex justify-around"
   >
     <div class="container w-[1000px]">
@@ -559,7 +580,7 @@ onMounted(async () => {
         <div class="rank_image_wrapper">
           <img class="w-[240px]" :src="isSoloQue ? rankImagePath : flexRankImage"  alt="" />
         </div>
-        <div class="ranked_info">
+        <div class="ranked_info flex flex-col bg-[#515163]">
           <div class="ranked_buttons_wrapper flex">
             <div
               @click="isSoloQue = true"
@@ -576,28 +597,29 @@ onMounted(async () => {
               <span>Flex</span>
             </div>
           </div>
-          <div class="solo_que_info" v-if="isSoloQue && soloQueInfo">
-            <ul class="text-xl mt-12 font-bold">
+          <div class="solo_que_info h-[198px]" v-if="isSoloQue && soloQueInfo">
+            <ul class="solo_que_info mt-6 text-xl font-bold">
               <li>{{ soloQueInfo.tier }} {{ soloQueInfo.rank }}</li>
               <li>{{ soloQueInfo.leaguePoints }} LP</li>
               <li>{{ soloQueInfo.wins }} WIN {{ soloQueInfo.losses }} LOSE</li>
               <li>WR {{ getWinRateInSoloQue() }} %</li>
             </ul>
           </div>
-          <div v-if="isSoloQue === false && flexInfo" class="flex_info">
-            <div class="flex_info_click">
-              <ul class="text-xl mt-12 font-bold">
+          <div v-if="isSoloQue === false && flexInfo" class="flex_info h-[198px]">
+              <ul class="text-xl mt-6 font-bold ">
                 <li>{{ flexInfo.tier }} {{ flexInfo.rank }}</li>
                 <li>{{ flexInfo.leaguePoints }} LP</li>
                 <li>{{ flexInfo.wins }} WIN {{ flexInfo.losses }} LOSE</li>
                 <li>WR {{ getWinRateInFlex() }} %</li>
               </ul>
-            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
+  <!-- <section v-if="">
+    <h2>Any Player Found: Make sure you typed the correct SummonerName and Tag</h2>
+  </section> -->
 </template>
 
 <style>
