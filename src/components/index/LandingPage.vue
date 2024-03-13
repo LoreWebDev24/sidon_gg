@@ -14,10 +14,10 @@ function hasOneAndOnlyOneHash(str) {
   return matches && matches.length === 1;
 }
 
-function hashToWord(inputString) {
-  let outputString = inputString.replace(/#/g, "TAG");
-  return outputString;
-}
+// function hashToWord(inputString) {
+//   let outputString = inputString.replace(/#/g, "TAG");
+//   return outputString;
+// }
 
 // FUNCTION THAT VERIFY THAT STRING HAS AT LEAST 3 CHAR AFTER HASH
 
@@ -58,7 +58,7 @@ function fetchPlayer() {
 
   router.push({
     name: "PlayerDetail",
-    params: { slug: hashToWord(playerSearch.value) },
+    params: { slug: encodeURIComponent(playerSearch.value) },
   });
 }
 </script>

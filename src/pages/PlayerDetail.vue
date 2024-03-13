@@ -1,8 +1,11 @@
 <script setup>
+
+// MY IMPORTS AND VARIABLES : 
+
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-const { slug } = defineProps(["slug"]);
+let { slug } = defineProps(["slug"]);
 const playerGames = ref([]);
 const soloQueInfo = ref([]);
 const flexInfo = ref([]);
@@ -15,9 +18,8 @@ let summonerIcon = ref("");
 let isSoloQue = ref(true);
 const unrankedImagePath = "/14.4/img/ranks/UNRANKED.webp";
 
-// let isFlex = false;
-// const SUMMONER_ID = getSummonerID();
-
+// MY FUNCTIONS AND GETTERS 
+ 
 function getPlayerInTheMatch(game) {
   let partecipant = game.info.participants.find((p) => p.puuid === PUUID.value);
   return partecipant;
@@ -113,18 +115,6 @@ function getmatchResult(game) {
   return participant && participant.win;
 }
 
-function replaceHashWithSlash(inputString) {
-  const stringWithoutHash = inputString.replace(/TAG/g, "/");
-
-  return stringWithoutHash;
-}
-
-function replaceTAGWithHash(inputString) {
-  const stringWithHash = inputString.replace(/TAG/g, "#");
-
-  return stringWithHash;
-}
-
 function getTypeOfGame(game) {
   const queID = game.info.queueId;
   const gameTypes = [
@@ -167,28 +157,6 @@ function getKdaStat(game) {
   return ((kills + assists) / deaths).toFixed(1);
 }
 
-// function timestampToDate(timestamp) {
-//   const date = new Date(timestamp);
-
-//   const year = date.getFullYear();
-//   const month = date.getMonth() + 1;
-//   const day = date.getDate();
-//   const hours = date.getHours();
-//   const minutes = date.getMinutes();
-//   const seconds = date.getSeconds();
-
-//   const formattedDate = `${month < 10 ? "0" + month : month}-${
-//     day < 10 ? "0" + day : day
-//   }`;
-//   const formattedTime = `${hours < 10 ? "0" + hours : hours}:${
-//     minutes < 10 ? "0" + minutes : minutes
-//   }`;
-
-//   const formattedDateTime = `${formattedDate} ${formattedTime}`;
-
-//   return formattedDateTime;
-// }
-
 function formatNicknameForTeamsDisplay(str) {
   if (str.length > 14) {
     return str.substring(0, 11) + "...";
@@ -201,11 +169,15 @@ function formattDamages(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+
+// AXIOS CALLS 
+
 onMounted(async () => {
+  slug = decodeURIComponent(slug);
   await axios
     .get("http://localhost:4000/past10Games", {
       params: {
-        username: replaceHashWithSlash(slug),
+        username: slug.replace(/#/g, "/"),
         summonerID: SUMMONER_ID.value,
       },
     })
@@ -221,26 +193,6 @@ onMounted(async () => {
     .catch((error) => {
       console.log(error);
     });
-
-    // const playerDetail = await axios
-    // .get("http://localhost:4000/past10Games", {
-    //   params: {
-    //     username: replaceHashWithSlash(slug),
-    //     summonerID: SUMMONER_ID.value,
-    //   },
-    // })
-    // .then((resp) => {
-    //   playerGames.value = resp.data[0];
-    //   PUUID.value = resp.data[1];
-    //   SUMMONER_ID.value = resp.data[2];
-    //   console.log(playerGames.value, PUUID.value, SUMMONER_ID.value);
-    //   console.log(slug);
-    //   console.log(replaceHashWithSlash(slug));
-    //   console.log(typeof replaceHashWithSlash(slug));
-    // })
-    // .catch((error) => {
-    //   console.log(error);
-    // });
 
   await axios
     .get("http://localhost:4000/summonerRankedInfos", {
@@ -290,7 +242,7 @@ onMounted(async () => {
       <div class="games_detail_wrapper grid gap-7 w-[1000px]">
         <template v-for="(game, i) in playerGames">
           <div
-            v-if="game.info.endOfGameResult === 'GameComplete'"
+            v-if="game.info.endOfGameResult != ''"
             :key="i"
             class="single_game_details h-[160px] rounded flex p-6 w-[1100px]"
             :class="getmatchResult(game) ? 'bg-[#28344E]' : 'bg-[#59343B]'"
@@ -553,13 +505,14 @@ onMounted(async () => {
                     :src="`/14.4/img/champion/${partecipantOfTheGame.championName}.png`"
                     alt="champion_image"
                   />
-                  <span class="">
+                  <a class="single_player_of_the_game" :href="`/PlayerDetail/${encodeURIComponent(partecipantOfTheGame.riotIdGameName + '#' + partecipantOfTheGame.riotIdTagline)}`"><span class="">
                     {{
                       formatNicknameForTeamsDisplay(
-                        partecipantOfTheGame.riotIdGameName
+                        partecipantOfTheGame.riotIdGameName 
+                        // partecipantOfTheGame.riotIdTagline
                       )
                     }}
-                  </span>
+                  </span></a>
                 </div>
               </div>
             </div>
@@ -576,7 +529,7 @@ onMounted(async () => {
           :src="summonerIcon"
           alt=""
         />
-        <h1 class="text-xl font-bold">{{ replaceTAGWithHash(slug) }}</h1>
+        <h1 class="text-xl font-bold">{{ decodeURIComponent(slug) }}</h1>
         <div class="rank_image_wrapper">
           <img class="w-[240px]" :src="isSoloQue ? rankImagePath : flexRankImage"  alt="" />
         </div>
@@ -628,5 +581,9 @@ onMounted(async () => {
   flex-flow: column wrap;
   gap: 2px 14px;
   justify-content: center;
+}
+
+.single_player_of_the_game:hover {
+  color: white;
 }
 </style>
